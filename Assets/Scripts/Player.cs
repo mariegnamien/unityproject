@@ -71,7 +71,7 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        controller.Move(direction * Time.fixedDeltaTime); // la formule utilisée dans move nous renverra un vecteur avec le nombre d'unités pour un déplacement sur un appel, fixedupdate est appelée 50 fois.
+        controller.Move(direction * Time.fixedDeltaTime); // The formula used in `move` will return a vector containing the number of units moved per call; `fixedupdate` is called 50 times.
 
     }
 
