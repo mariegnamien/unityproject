@@ -54,8 +54,7 @@ public class Player : MonoBehaviour
             }
         }
         Vector3 targetPosition = transform.position.z * transform.forward + transform.position.y * transform.up;
-
-        if(desiredLane == 2)
+        if (desiredLane == 2)
         {
             targetPosition += Vector3.right * laneDistance;
       
