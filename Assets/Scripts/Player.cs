@@ -25,7 +25,7 @@ public class Player : MonoBehaviour
         if (controller.isGrounded)
         {
             direction.y = 0; // or -1
-            if (Input.GetKeyDown(KeyCode.UpArrow))
+            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
             {
                 Jump();
             }
