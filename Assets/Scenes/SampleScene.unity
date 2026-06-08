@@ -410,7 +410,7 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   m_Enabled: 1
-  serializedVersion: 12
+  serializedVersion: 13
   m_Type: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 2
@@ -462,7 +462,7 @@ Light:
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
-  m_ShadowRadius: 0
+  m_ShapeRadius: 0
   m_ShadowAngle: 0
   m_LightUnit: 1
   m_LuxAtDistance: 1
@@ -635,6 +635,63 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!1001 &2097209027
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 8387516007750379753, guid: 6a5694de16432e24da325e1f02fd78e0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.40567
+      objectReference: {fileID: 0}
+    - target: {fileID: 8387516007750379753, guid: 6a5694de16432e24da325e1f02fd78e0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8387516007750379753, guid: 6a5694de16432e24da325e1f02fd78e0, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -2.10715
+      objectReference: {fileID: 0}
+    - target: {fileID: 8387516007750379753, guid: 6a5694de16432e24da325e1f02fd78e0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8387516007750379753, guid: 6a5694de16432e24da325e1f02fd78e0, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8387516007750379753, guid: 6a5694de16432e24da325e1f02fd78e0, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8387516007750379753, guid: 6a5694de16432e24da325e1f02fd78e0, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8387516007750379753, guid: 6a5694de16432e24da325e1f02fd78e0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8387516007750379753, guid: 6a5694de16432e24da325e1f02fd78e0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8387516007750379753, guid: 6a5694de16432e24da325e1f02fd78e0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9164158878184469075, guid: 6a5694de16432e24da325e1f02fd78e0, type: 3}
+      propertyPath: m_Name
+      value: Metallic_Coin01_Copper-Gold
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6a5694de16432e24da325e1f02fd78e0, type: 3}
 --- !u!1001 &4228452083835444524
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -701,3 +758,4 @@ SceneRoots:
   - {fileID: 410087041}
   - {fileID: 868311651}
   - {fileID: 4228452083835444524}
+  - {fileID: 2097209027}
