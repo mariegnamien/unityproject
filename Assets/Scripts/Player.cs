@@ -53,20 +53,17 @@ public class Player : MonoBehaviour
                 desiredLane = 0;
             }
         }
-        Vector3 targetPosition = transform.position.z * transform.forward + transform.position.y * transform.up;
+        // Calcul de la position cible en X
+        Vector3 targetPosition = transform.position;
+        if (desiredLane == 2)
+            targetPosition.x = laneDistance;
+        else if (desiredLane == 0)
+            targetPosition.x = -laneDistance;
+        else
+            targetPosition.x = 0;
 
-        if(desiredLane == 2)
-        {
-            targetPosition += Vector3.right * laneDistance;
-      
-        }
-        else if(desiredLane == 0)
-        {
-            targetPosition += Vector3.left * laneDistance;
-
-        }
-
-        transform.position = Vector3.Lerp(transform.position, targetPosition, 80 * Time.fixedDeltaTime);
+        // Déplacement latéral via direction, pas transform.position
+        direction.x = (targetPosition.x - transform.position.x) * 10f;
     }
 
     private void FixedUpdate()
