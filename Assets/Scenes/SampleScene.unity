@@ -517,7 +517,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1694617be23a8c848b239b78d9c7b116, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
-  forwardSpeed: 5
+  forwardSpeed: 10
   laneDistance: 2.5
   jumpForce: 15
   gravity: -20
@@ -650,6 +650,7 @@ MonoBehaviour:
   tileLength: 30
   zSpawn: 0
   numberOfTiles: 6
+  playerTransform: {fileID: 733746124}
 --- !u!4 &1002024419
 Transform:
   m_ObjectHideFlags: 0
