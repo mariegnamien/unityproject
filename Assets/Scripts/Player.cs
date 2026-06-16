@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -16,11 +17,25 @@ public class Player : MonoBehaviour
     private Renderer gfxRenderer;
     private bool touchingObstacle;
     private bool wasTouchingObstacle;
-    private const int StartingLives = 5;
+    private const int StartingLives = 2;
     private int lives;
     private int maxLives;
     private Texture2D fullHeart;
     private Texture2D emptyHeart;
+
+    public float followerSpacing = 0.25f; 
+    public float followerAlpha = 0.5f;   
+    public float followerDelay = 0.3f;   
+    public float followerHeightOffset = 0.6f; 
+    private readonly List<Transform> followers = new List<Transform>();
+
+    private struct Snapshot
+    {
+        public float time;
+        public Vector3 position;
+        public Quaternion rotation;
+    }
+    private readonly List<Snapshot> history = new List<Snapshot>();
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -85,13 +100,117 @@ public class Player : MonoBehaviour
     {
         touchingObstacle = false;
         controller.Move(direction * Time.fixedDeltaTime); // la formule utilisée dans move nous renverra un vecteur avec le nombre d'unités pour un déplacement sur un appel, fixedupdate est appelée 50 fois.
-        gfxRenderer.material.color = touchingObstacle ? Color.green : Color.white;
+        
         
         if (touchingObstacle && !wasTouchingObstacle && lives > 0)
         {
             lives--;
+            if (followers.Count == 0) 
+                SpawnFollower();
         }
         wasTouchingObstacle = touchingObstacle;
+
+        RecordHistory();
+        UpdateFollowers();
+    }
+
+    
+    private void SpawnFollower()
+    {
+        Transform gfx = gfxRenderer.transform;
+
+        GameObject root = new GameObject("Follower");
+        GameObject visual = Instantiate(gfx.gameObject);
+        visual.transform.SetParent(root.transform, false);
+        visual.transform.localPosition = gfx.localPosition;
+        visual.transform.localRotation = gfx.localRotation;
+        visual.transform.localScale = gfx.localScale;
+
+        Renderer rend = visual.GetComponentInChildren<Renderer>();
+        if (rend != null)
+            MakeTransparent(rend.material, followerAlpha);
+
+        root.transform.rotation = transform.rotation;
+        followers.Add(root.transform);
+    }
+
+
+    private void RecordHistory()
+    {
+        history.Add(new Snapshot
+        {
+            time = Time.time,
+            position = transform.position,
+            rotation = transform.rotation
+        });
+
+        float oldestNeeded = Time.time - followerDelay * (followers.Count + 1) - 0.5f;
+        while (history.Count > 1 && history[0].time < oldestNeeded)
+            history.RemoveAt(0);
+    }
+
+
+    private void UpdateFollowers()
+    {
+        for (int i = 0; i < followers.Count; i++)
+        {
+            float targetTime = Time.time - followerDelay * (i + 1);
+            Snapshot snap = SampleHistory(targetTime);
+
+            Vector3 pos = snap.position;
+            pos.z -= (i + 1) * followerSpacing; 
+            pos.y += followerHeightOffset;     
+            followers[i].position = pos;
+            followers[i].rotation = snap.rotation;
+        }
+    }
+    
+    private Snapshot SampleHistory(float targetTime)
+    {
+        if (history.Count == 0)
+            return new Snapshot { time = targetTime, position = transform.position, rotation = transform.rotation };
+
+        if (targetTime <= history[0].time)
+            return history[0];
+
+        for (int i = history.Count - 1; i >= 0; i--)
+        {
+            if (history[i].time <= targetTime)
+            {
+                if (i == history.Count - 1)
+                    return history[i];
+
+                Snapshot a = history[i];
+                Snapshot b = history[i + 1];
+                float span = b.time - a.time;
+                float t = span > 0f ? (targetTime - a.time) / span : 0f;
+                return new Snapshot
+                {
+                    time = targetTime,
+                    position = Vector3.Lerp(a.position, b.position, t),
+                    rotation = Quaternion.Slerp(a.rotation, b.rotation, t)
+                };
+            }
+        }
+
+        return history[history.Count - 1];
+    }
+    
+    private void MakeTransparent(Material mat, float alpha)
+    {
+        Color c = mat.color;
+        c.a = alpha;
+        mat.color = c;
+
+        if (mat.HasProperty("_Surface")) mat.SetFloat("_Surface", 1f); 
+        if (mat.HasProperty("_Mode")) mat.SetFloat("_Mode", 3f); 
+        if (mat.HasProperty("_SrcBlend")) mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        if (mat.HasProperty("_DstBlend")) mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        if (mat.HasProperty("_ZWrite")) mat.SetInt("_ZWrite", 0);
+        mat.DisableKeyword("_SURFACE_TYPE_OPAQUE");
+        mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        mat.EnableKeyword("_ALPHABLEND_ON");
+        mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
     }
 
     private void OnGUI()
