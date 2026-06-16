@@ -12,9 +12,13 @@ public class Player : MonoBehaviour
 
     public float jumpForce;
     public float gravity = -20;
+
+    private Renderer gfxRenderer;
+    private bool touchingObstacle;
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        gfxRenderer = GetComponentInChildren<MeshRenderer>();
     }
 
     // Update is called once per frame
@@ -68,8 +72,15 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
+        touchingObstacle = false;
         controller.Move(direction * Time.fixedDeltaTime); // la formule utilisée dans move nous renverra un vecteur avec le nombre d'unités pour un déplacement sur un appel, fixedupdate est appelée 50 fois.
+        gfxRenderer.material.color = touchingObstacle ? Color.green : Color.white;
+    }
 
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (hit.normal.y < 0.5f)
+            touchingObstacle = true;
     }
 
     private void Jump()
