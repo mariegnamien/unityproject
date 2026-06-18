@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,13 +15,22 @@ public class Player : MonoBehaviour
     public float gravity = -20;
 
     private Renderer gfxRenderer;
-    private bool touchingObstacle;
-    private bool wasTouchingObstacle;
+    // private bool touchingObstacle;
+    // private bool wasTouchingObstacle;
     private const int StartingLives = 2;
     private int lives;
     private int maxLives;
     private Texture2D fullHeart;
     private Texture2D emptyHeart;
+
+    private Animator animator;
+    private float originalHeight;
+    private Vector3 originalCenter;
+    public float slideSpeed = 18f;
+    public float slideDuration = 0.8f;
+    private bool isSliding;
+    private int normalLayer;
+    private int slideLayer;
 
     [Header("Configuration du Fantôme")]
     public GameObject follower;
@@ -55,19 +65,31 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        controller = GetComponent<CharacterController>();
-        gfxRenderer = GetComponentInChildren<Renderer>();
+    controller = GetComponent<CharacterController>();
+    gfxRenderer = GetComponentInChildren<Renderer>();
+    animator = GetComponentInChildren<Animator>();
 
-        lives = StartingLives;
-        maxLives = StartingLives;
-        fullHeart = CreateHeartTexture(true);
-        emptyHeart = CreateHeartTexture(false);
+    normalLayer = gameObject.layer;
+    slideLayer = LayerMask.NameToLayer("SlidePlayer");
+
+    if (slideLayer == -1)
+    {
+        Debug.LogError("SlidePlayer layer bulunamadı!");
+    }
+
+    lives = StartingLives;
+    maxLives = StartingLives;
+    fullHeart = CreateHeartTexture(true);
+    emptyHeart = CreateHeartTexture(false);
+    originalHeight = controller.height;
+    originalCenter = controller.center;
     }
 
     void Update()
     {
         direction.z = forwardSpeed;
         direction.y += gravity * Time.deltaTime;
+        direction.z = isSliding ? slideSpeed : forwardSpeed;
         if (controller.isGrounded)
         {
             direction.y = 0;
@@ -93,6 +115,16 @@ public class Player : MonoBehaviour
             if (desiredLane == -1) desiredLane = 0;
         }
 
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            animator.SetTrigger("Slide");
+
+        }
+        if (Input.GetKeyDown(KeyCode.DownArrow) && !isSliding)
+        {
+            StartCoroutine(Slide());
+        }
+
         Vector3 targetPosition = transform.position;
         if (desiredLane == 2)
             targetPosition.x = laneDistance;
@@ -104,19 +136,27 @@ public class Player : MonoBehaviour
         direction.x = (targetPosition.x - transform.position.x) * 10f;
     }
 
-    private void FixedUpdate()
+    private IEnumerator Slide()
     {
-        touchingObstacle = false;
+    isSliding = true;  // ← eksikti
+    animator.SetTrigger("Slide");
+
+    gameObject.layer = slideLayer;
+
+    controller.height = originalHeight * 0.5f;
+    controller.center = new Vector3(originalCenter.x, controller.height / 2f, originalCenter.z);
+
+    yield return new WaitForSeconds(slideDuration); // ← 0.8f yerine variable kullan
+
+    controller.height = originalHeight;
+    controller.center = originalCenter;
+
+    gameObject.layer = normalLayer;
+    isSliding = false;  // ← eksikti
+    }
+   private void FixedUpdate()
+{
         controller.Move(direction * Time.fixedDeltaTime);
-
-        if (touchingObstacle && !wasTouchingObstacle && lives > 0)
-        {
-            lives--;
-            if (followers.Count == 0)
-                SpawnFollower();
-        }
-        wasTouchingObstacle = touchingObstacle;
-
         RecordHistory();
         UpdateFollowers();
     }
@@ -253,12 +293,33 @@ public class Player : MonoBehaviour
         return tex;
     }
 
-    private void OnControllerColliderHit(ControllerColliderHit hit)
+    // private void OnControllerColliderHit(ControllerColliderHit hit)
+    // {
+    // if (isSliding) return; // ← slide'daysa collision'ı yoksay
+    
+    // if (hit.normal.y < 0.5f)
+    //     touchingObstacle = true;
+    // }
+    private void OnTriggerEnter(Collider other)
+{
+    if (isSliding) return;
+    
+    if (other.CompareTag("Obstacle") && lives > 0)
     {
-        if (hit.normal.y < 0.5f)
-            touchingObstacle = true;
+        lives--;
+        if (followers.Count == 0)
+            SpawnFollower();
     }
+}
 
+    // private void OnTriggerExit(Collider other)
+    // {
+    //     if (other.CompareTag("Obstacle"))
+    //         touchingObstacle = false;
+    // }
+    private void OnTriggerExit(Collider other)
+{
+}
     private void Jump()
     {
         direction.y = jumpForce;

@@ -224,9 +224,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4339068290033754953}
   - component: {fileID: 3369635211535991580}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: fenceModel 1
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
