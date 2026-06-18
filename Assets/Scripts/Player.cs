@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     private CharacterController controller;
     private Vector3 direction;
     public float forwardSpeed;
@@ -23,11 +22,28 @@ public class Player : MonoBehaviour
     private Texture2D fullHeart;
     private Texture2D emptyHeart;
 
-    public float followerSpacing = 0.25f; 
-    public float followerAlpha = 0.5f;   
-    public float followerDelay = 0.3f;   
-    public float followerHeightOffset = 0.6f; 
+    [Header("Configuration du Fantôme")]
+    public GameObject follower;
+    public float followerSpacing = 0.25f;
+    public float followerAlpha = 0.5f;
+    public float followerDelay = 0.3f;
+    public float followerHeightOffset = 0.6f;
     private readonly List<Transform> followers = new List<Transform>();
+
+    private void SpawnFollower()
+    {
+        if (follower == null) return;
+
+        GameObject root = new GameObject("Follower");
+        GameObject visual = Instantiate(follower);
+
+        visual.transform.SetParent(root.transform, false);
+
+        root.transform.position = transform.position;
+        root.transform.rotation = transform.rotation;
+
+        followers.Add(root.transform);
+    }
 
     private struct Snapshot
     {
@@ -36,10 +52,11 @@ public class Player : MonoBehaviour
         public Quaternion rotation;
     }
     private readonly List<Snapshot> history = new List<Snapshot>();
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        gfxRenderer = GetComponentInChildren<MeshRenderer>();
+        gfxRenderer = GetComponentInChildren<Renderer>();
 
         lives = StartingLives;
         maxLives = StartingLives;
@@ -47,14 +64,13 @@ public class Player : MonoBehaviour
         emptyHeart = CreateHeartTexture(false);
     }
 
-    // Update is called once per frame
     void Update()
     {
         direction.z = forwardSpeed;
         direction.y += gravity * Time.deltaTime;
         if (controller.isGrounded)
         {
-            direction.y = 0; // or -1
+            direction.y = 0;
             if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
             {
                 Jump();
@@ -64,26 +80,19 @@ public class Player : MonoBehaviour
                 direction.y += gravity * Time.deltaTime;
             }
         }
-        //gather inputs for the desired lane
+
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             desiredLane++;
-            if(desiredLane == 3)
-            {
-                desiredLane = 2;
-            }
-
+            if (desiredLane == 3) desiredLane = 2;
         }
 
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             desiredLane--;
-            if(desiredLane == -1)
-            {
-                desiredLane = 0;
-            }
+            if (desiredLane == -1) desiredLane = 0;
         }
-        // Calcul de la position cible en X
+
         Vector3 targetPosition = transform.position;
         if (desiredLane == 2)
             targetPosition.x = laneDistance;
@@ -92,20 +101,18 @@ public class Player : MonoBehaviour
         else
             targetPosition.x = 0;
 
-        // Déplacement latéral via direction, pas transform.position
         direction.x = (targetPosition.x - transform.position.x) * 10f;
     }
 
     private void FixedUpdate()
     {
         touchingObstacle = false;
-        controller.Move(direction * Time.fixedDeltaTime); // la formule utilisée dans move nous renverra un vecteur avec le nombre d'unités pour un déplacement sur un appel, fixedupdate est appelée 50 fois.
-        
-        
+        controller.Move(direction * Time.fixedDeltaTime);
+
         if (touchingObstacle && !wasTouchingObstacle && lives > 0)
         {
             lives--;
-            if (followers.Count == 0) 
+            if (followers.Count == 0)
                 SpawnFollower();
         }
         wasTouchingObstacle = touchingObstacle;
@@ -113,27 +120,6 @@ public class Player : MonoBehaviour
         RecordHistory();
         UpdateFollowers();
     }
-
-    
-    private void SpawnFollower()
-    {
-        Transform gfx = gfxRenderer.transform;
-
-        GameObject root = new GameObject("Follower");
-        GameObject visual = Instantiate(gfx.gameObject);
-        visual.transform.SetParent(root.transform, false);
-        visual.transform.localPosition = gfx.localPosition;
-        visual.transform.localRotation = gfx.localRotation;
-        visual.transform.localScale = gfx.localScale;
-
-        Renderer rend = visual.GetComponentInChildren<Renderer>();
-        if (rend != null)
-            MakeTransparent(rend.material, followerAlpha);
-
-        root.transform.rotation = transform.rotation;
-        followers.Add(root.transform);
-    }
-
 
     private void RecordHistory()
     {
@@ -149,7 +135,6 @@ public class Player : MonoBehaviour
             history.RemoveAt(0);
     }
 
-
     private void UpdateFollowers()
     {
         for (int i = 0; i < followers.Count; i++)
@@ -158,13 +143,13 @@ public class Player : MonoBehaviour
             Snapshot snap = SampleHistory(targetTime);
 
             Vector3 pos = snap.position;
-            pos.z -= (i + 1) * followerSpacing; 
-            pos.y += followerHeightOffset;     
+            pos.z -= (i + 1) * followerSpacing;
+            pos.y += followerHeightOffset;
             followers[i].position = pos;
             followers[i].rotation = snap.rotation;
         }
     }
-    
+
     private Snapshot SampleHistory(float targetTime)
     {
         if (history.Count == 0)
@@ -194,23 +179,6 @@ public class Player : MonoBehaviour
         }
 
         return history[history.Count - 1];
-    }
-    
-    private void MakeTransparent(Material mat, float alpha)
-    {
-        Color c = mat.color;
-        c.a = alpha;
-        mat.color = c;
-
-        if (mat.HasProperty("_Surface")) mat.SetFloat("_Surface", 1f); 
-        if (mat.HasProperty("_Mode")) mat.SetFloat("_Mode", 3f); 
-        if (mat.HasProperty("_SrcBlend")) mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-        if (mat.HasProperty("_DstBlend")) mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-        if (mat.HasProperty("_ZWrite")) mat.SetInt("_ZWrite", 0);
-        mat.DisableKeyword("_SURFACE_TYPE_OPAQUE");
-        mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-        mat.EnableKeyword("_ALPHABLEND_ON");
-        mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
     }
 
     private void OnGUI()
@@ -294,6 +262,5 @@ public class Player : MonoBehaviour
     private void Jump()
     {
         direction.y = jumpForce;
-
     }
 }

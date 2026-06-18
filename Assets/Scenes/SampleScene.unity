@@ -431,6 +431,7 @@ MonoBehaviour:
   laneDistance: 2.5
   jumpForce: 15
   gravity: -20
+  follower: {fileID: 1694312076177176500, guid: ae71a973bc10ce0448acc6497a98b623, type: 3}
   followerSpacing: 0.25
   followerAlpha: 0.5
   followerDelay: 0.3
@@ -469,7 +470,7 @@ Transform:
   m_GameObject: {fileID: 733746121}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.021, y: -0.42013, z: 0}
+  m_LocalPosition: {x: 0.07345653, y: -0.42013, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
