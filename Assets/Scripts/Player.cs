@@ -19,7 +19,6 @@ public class Player : MonoBehaviour
     private bool touchingObstacle;
     private bool wasTouchingObstacle;
 
-    // --- PROTECTION TEMPORELLE ---
     private float invincibilityTimer = 0f;
 
     private const int StartingLives = 2;
@@ -28,9 +27,11 @@ public class Player : MonoBehaviour
     private Texture2D fullHeart;
     private Texture2D emptyHeart;
 
-    // --- ÉCRAN DE FIN ---
     [Header("Écran de Fin")]
     public GameObject gameOverUI;
+
+    [Header("Audio")]
+    public AudioSource backgroundMusic;
 
     private Animator animator;
     private float originalHeight;
@@ -87,7 +88,6 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        // On s'assure que le jeu tourne normalement au démarrage
         Time.timeScale = 1f;
 
         controller = GetComponent<CharacterController>();
@@ -117,7 +117,6 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        // Si le jeu est arrêté, on ne fait rien
         if (Time.timeScale == 0f) return;
 
         direction.z = isSliding ? slideSpeed : forwardSpeed;
@@ -170,7 +169,6 @@ public class Player : MonoBehaviour
 
         direction.x = (targetPosition.x - transform.position.x) * 10f;
 
-        // --- GESTION DES DEGATS AVEC LE TIMER DE SÉCURITÉ ---
         if (touchingObstacle && !wasTouchingObstacle)
         {
             if (Time.time >= invincibilityTimer && lives > 0)
@@ -183,7 +181,6 @@ public class Player : MonoBehaviour
                     SpawnFollower();
                 }
 
-                // Déclenchement du Game Over si plus de vies
                 if (lives <= 0)
                 {
                     GameOver();
@@ -196,7 +193,11 @@ public class Player : MonoBehaviour
 
     private void GameOver()
     {
-        // 1. On affiche l'écran de fin (et la vidéo s'active automatiquement !)
+        if (backgroundMusic != null)
+        {
+            backgroundMusic.Stop();
+        }
+
         if (gameOverUI != null)
         {
             gameOverUI.SetActive(true);
