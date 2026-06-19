@@ -29,8 +29,10 @@ public class Player : MonoBehaviour
     public float slideSpeed = 18f;
     public float slideDuration = 0.8f;
     private bool isSliding;
+    private bool isJumping;
     private int normalLayer;
     private int slideLayer;
+    private int jumpLayer; // ← ekle
 
     [Header("Configuration du Fantôme")]
     public GameObject follower;
@@ -71,6 +73,7 @@ public class Player : MonoBehaviour
 
     normalLayer = gameObject.layer;
     slideLayer = LayerMask.NameToLayer("SlidePlayer");
+    jumpLayer = LayerMask.NameToLayer("JumpPlayer");
 
     if (slideLayer == -1)
     {
@@ -90,17 +93,33 @@ public class Player : MonoBehaviour
         direction.z = forwardSpeed;
         direction.y += gravity * Time.deltaTime;
         direction.z = isSliding ? slideSpeed : forwardSpeed;
+        // if (controller.isGrounded)
+        // {
+        //     direction.y = 0;
+        //     if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
+        //     {
+        //         Jump();
+        //     }
+        //     else
+        //     {
+        //         direction.y += gravity * Time.deltaTime;
+        //     }
+        // }
         if (controller.isGrounded)
         {
-            direction.y = 0;
+            direction.y = -1f;
+            if (!isSliding) // ← ekle
+                gameObject.layer = normalLayer;
+            animator.SetBool("IsGrounded", true);
             if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
             {
+                animator.SetBool("IsGrounded", false);
                 Jump();
             }
-            else
-            {
-                direction.y += gravity * Time.deltaTime;
-            }
+        }
+        else
+        {
+            direction.y += gravity * Time.deltaTime;
         }
 
         if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -302,7 +321,7 @@ public class Player : MonoBehaviour
     // }
     private void OnTriggerEnter(Collider other)
 {
-    if (isSliding) return;
+    if (isSliding || isJumping) return; // ← isJumping ekle
     
     if (other.CompareTag("Obstacle") && lives > 0)
     {
@@ -320,8 +339,10 @@ public class Player : MonoBehaviour
     private void OnTriggerExit(Collider other)
 {
 }
-    private void Jump()
-    {
-        direction.y = jumpForce;
-    }
+private void Jump()
+{
+    direction.y = jumpForce;
+    animator.SetTrigger("Jump");
+    gameObject.layer = jumpLayer;
+}
 }
