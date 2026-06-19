@@ -23,7 +23,7 @@ MonoBehaviour:
   - m_enabled: 1
     m_path: Assets/Scenes/MainMenu.unity
   - m_enabled: 1
-    m_path: Assets/Scenes/GameScene.unity
+    m_path: Assets/Scenes/SampleScene.unity
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
@@ -53,4 +53,4 @@ MonoBehaviour:
         m_CreateSolution: 0
         m_CopyPDBFiles: 0
         m_WindowsDevicePortalAddress: 
-        m_WindowsDevicePortalUsername:
+        m_WindowsDevicePortalUsername: 

@@ -6,7 +6,7 @@ public class MainMenu : MonoBehaviour
     // appele par bouton Play
     public void PlayGame()
     {
-        SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene("SampleScene");
     }
 
     // bouton "Quitter"
