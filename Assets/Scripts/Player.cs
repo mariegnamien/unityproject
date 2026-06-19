@@ -15,6 +15,13 @@ public class Player : MonoBehaviour
     public float gravity = -20;
 
     private Renderer gfxRenderer;
+
+    private bool touchingObstacle;
+    private bool wasTouchingObstacle;
+
+    // --- PROTECTION TEMPORELLE ---
+    private float invincibilityTimer = 0f;
+
     private const int StartingLives = 2;
     private int lives;
     private int maxLives;
@@ -37,10 +44,9 @@ public class Player : MonoBehaviour
     public float followerSpacing = 0.25f;
     public float followerAlpha = 0.5f;
     public float followerDelay = 0.3f;
-    public float followerHeightOffset = 0.6f;
+    public float followerHeightOffset = 1.5f;
     private readonly List<Transform> followers = new List<Transform>();
 
-    // --- LE CODE REPARÉ DE SPAWN FOLLOWER ---
     private void SpawnFollower()
     {
         if (follower == null) return;
@@ -53,7 +59,6 @@ public class Player : MonoBehaviour
         root.transform.position = transform.position;
         root.transform.rotation = transform.rotation;
 
-        // Optionnel : Applique l'alpha transparent sur les renderers du fantôme
         Renderer[] renderers = visual.GetComponentsInChildren<Renderer>();
         foreach (Renderer r in renderers)
         {
@@ -95,8 +100,6 @@ public class Player : MonoBehaviour
         emptyHeart = CreateHeartTexture(false);
         originalHeight = controller.height;
         originalCenter = controller.center;
-
-        SpawnFollower();
     }
 
     void Update()
@@ -150,6 +153,24 @@ public class Player : MonoBehaviour
             targetPosition.x = 0;
 
         direction.x = (targetPosition.x - transform.position.x) * 10f;
+
+        // --- GESTION DES DEGATS AVEC LE TIMER DE SÉCURITÉ ---
+        if (touchingObstacle && !wasTouchingObstacle)
+        {
+            // On vérifie si on n'est pas encore sous immunité temporelle
+            if (Time.time >= invincibilityTimer && lives > 0)
+            {
+                lives--; // On enlève 1 seule vie (2 -> 1)
+                invincibilityTimer = Time.time + 1.2f; // Immunisé pendant 1,2 seconde
+
+                if (followers.Count == 0)
+                {
+                    SpawnFollower(); // Le fantôme apparaît à la première collision !
+                }
+            }
+        }
+        wasTouchingObstacle = touchingObstacle;
+        touchingObstacle = false;
     }
 
     private IEnumerator Slide()
@@ -183,6 +204,17 @@ public class Player : MonoBehaviour
         controller.Move(direction * Time.fixedDeltaTime);
         RecordHistory();
         UpdateFollowers();
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (isSliding || isJumping) return;
+
+        if (hit.normal.y < 0.5f)
+        {
+
+                touchingObstacle = true;
+        }
     }
 
     private void RecordHistory()
@@ -250,12 +282,12 @@ public class Player : MonoBehaviour
         int spacing = 6;
         int margin = 15;
         int totalWidth = maxLives * heartSize + (maxLives - 1) * spacing;
-        int startX = Screen.width - margin - totalWidth;
+        int startStartX = Screen.width - margin - totalWidth;
 
         for (int i = 0; i < maxLives; i++)
         {
             Texture2D tex = i < lives ? fullHeart : emptyHeart;
-            Rect r = new Rect(startX + i * (heartSize + spacing), margin, heartSize, heartSize);
+            Rect r = new Rect(startStartX + i * (heartSize + spacing), margin, heartSize, heartSize);
             GUI.DrawTexture(r, tex);
         }
     }
@@ -310,17 +342,5 @@ public class Player : MonoBehaviour
         }
         tex.Apply();
         return tex;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (isSliding || isJumping) return;
-
-        if (other.CompareTag("Obstacle") && lives > 0)
-        {
-            lives--;
-            if (followers.Count == 0)
-                SpawnFollower();
-        }
     }
 }
