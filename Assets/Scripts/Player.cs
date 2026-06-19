@@ -28,6 +28,10 @@ public class Player : MonoBehaviour
     private Texture2D fullHeart;
     private Texture2D emptyHeart;
 
+    // --- ÉCRAN DE FIN ---
+    [Header("Écran de Fin")]
+    public GameObject gameOverUI;
+
     private Animator animator;
     private float originalHeight;
     private Vector3 originalCenter;
@@ -83,6 +87,9 @@ public class Player : MonoBehaviour
 
     void Start()
     {
+        // On s'assure que le jeu tourne normalement au démarrage
+        Time.timeScale = 1f;
+
         controller = GetComponent<CharacterController>();
         gfxRenderer = GetComponentInChildren<Renderer>();
         animator = GetComponentInChildren<Animator>();
@@ -100,10 +107,19 @@ public class Player : MonoBehaviour
         emptyHeart = CreateHeartTexture(false);
         originalHeight = controller.height;
         originalCenter = controller.center;
+
+        // Masquer l'écran de fin au début du jeu
+        if (gameOverUI != null)
+        {
+            gameOverUI.SetActive(false);
+        }
     }
 
     void Update()
     {
+        // Si le jeu est arrêté, on ne fait rien
+        if (Time.timeScale == 0f) return;
+
         direction.z = isSliding ? slideSpeed : forwardSpeed;
 
         if (controller.isGrounded)
@@ -157,20 +173,37 @@ public class Player : MonoBehaviour
         // --- GESTION DES DEGATS AVEC LE TIMER DE SÉCURITÉ ---
         if (touchingObstacle && !wasTouchingObstacle)
         {
-            // On vérifie si on n'est pas encore sous immunité temporelle
             if (Time.time >= invincibilityTimer && lives > 0)
             {
-                lives--; // On enlève 1 seule vie (2 -> 1)
-                invincibilityTimer = Time.time + 1.2f; // Immunisé pendant 1,2 seconde
+                lives--; // On enlève 1 vie
+                invincibilityTimer = Time.time + 1.2f;
 
                 if (followers.Count == 0)
                 {
-                    SpawnFollower(); // Le fantôme apparaît à la première collision !
+                    SpawnFollower();
+                }
+
+                // Déclenchement du Game Over si plus de vies
+                if (lives <= 0)
+                {
+                    GameOver();
                 }
             }
         }
         wasTouchingObstacle = touchingObstacle;
         touchingObstacle = false;
+    }
+
+    private void GameOver()
+    {
+        // 1. On affiche l'écran de fin (et la vidéo s'active automatiquement !)
+        if (gameOverUI != null)
+        {
+            gameOverUI.SetActive(true);
+        }
+
+        // 2. On fige le temps du jeu
+        Time.timeScale = 0f;
     }
 
     private IEnumerator Slide()
@@ -201,6 +234,8 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (Time.timeScale == 0f) return;
+
         controller.Move(direction * Time.fixedDeltaTime);
         RecordHistory();
         UpdateFollowers();
@@ -212,8 +247,7 @@ public class Player : MonoBehaviour
 
         if (hit.normal.y < 0.5f)
         {
-
-                touchingObstacle = true;
+            touchingObstacle = true;
         }
     }
 

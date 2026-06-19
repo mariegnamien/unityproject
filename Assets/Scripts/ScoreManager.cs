@@ -33,19 +33,19 @@ public class ScoreManager : MonoBehaviour
     {
         if (playerTransform == null) return;
 
-        // 1. Calculating the score by distance
+        // Calculating the score by distance
         float distanceCalculated = playerTransform.position.z - startZ;
 
         // Distance × Basis Points × Current Multiplier (stored in a 'long' to prevent overflow during calculation)
         long rawScore = (long)(distanceCalculated * pointsPerUnit * currentMultiplier);
 
-        // We clamp the score to the absolute maximum value of an int (2,147,483,647)
+        // We clamp the score to the absolute maximum value of an int
         int finalScore = (int)Mathf.Min(rawScore, int.MaxValue);
 
         // Score displayed (The "D8" forces at least 8 digits, but will naturally grow to 9 or 10 digits if needed)
         scoreText.text = finalScore.ToString("D8");
 
-        // 2. Time management for speed and multiplier
+        // Time management for speed and multiplier
         speedTimer += Time.deltaTime;
 
         if (speedTimer >= timeToIncreaseSpeed)
