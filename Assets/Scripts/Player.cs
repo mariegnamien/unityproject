@@ -86,6 +86,7 @@ public class Player : MonoBehaviour
     emptyHeart = CreateHeartTexture(false);
     originalHeight = controller.height;
     originalCenter = controller.center;
+    SpawnFollower();
     }
 
     void Update()
