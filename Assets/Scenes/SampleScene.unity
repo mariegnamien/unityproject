@@ -431,7 +431,9 @@ MonoBehaviour:
   laneDistance: 2.5
   jumpForce: 15
   gravity: -20
-  follower: {fileID: 1694312076177176500, guid: ae71a973bc10ce0448acc6497a98b623, type: 3}
+  slideSpeed: 18
+  slideDuration: 0.8
+  follower: {fileID: 919132149155446097, guid: f1a60ce8425911a4999f3dbcade55914, type: 3}
   followerSpacing: 0.25
   followerAlpha: 0.5
   followerDelay: 0.3

@@ -15,8 +15,6 @@ public class Player : MonoBehaviour
     public float gravity = -20;
 
     private Renderer gfxRenderer;
-    // private bool touchingObstacle;
-    // private bool wasTouchingObstacle;
     private const int StartingLives = 2;
     private int lives;
     private int maxLives;
@@ -32,7 +30,7 @@ public class Player : MonoBehaviour
     private bool isJumping;
     private int normalLayer;
     private int slideLayer;
-    private int jumpLayer; // ← ekle
+    private int jumpLayer;
 
     [Header("Configuration du Fantôme")]
     public GameObject follower;
@@ -42,6 +40,7 @@ public class Player : MonoBehaviour
     public float followerHeightOffset = 0.6f;
     private readonly List<Transform> followers = new List<Transform>();
 
+    // --- LE CODE REPARÉ DE SPAWN FOLLOWER ---
     private void SpawnFollower()
     {
         if (follower == null) return;
@@ -53,6 +52,18 @@ public class Player : MonoBehaviour
 
         root.transform.position = transform.position;
         root.transform.rotation = transform.rotation;
+
+        // Optionnel : Applique l'alpha transparent sur les renderers du fantôme
+        Renderer[] renderers = visual.GetComponentsInChildren<Renderer>();
+        foreach (Renderer r in renderers)
+        {
+            if (r.material.HasProperty("_Color"))
+            {
+                Color c = r.material.color;
+                c.a = followerAlpha;
+                r.material.color = c;
+            }
+        }
 
         followers.Add(root.transform);
     }
@@ -67,51 +78,41 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-    controller = GetComponent<CharacterController>();
-    gfxRenderer = GetComponentInChildren<Renderer>();
-    animator = GetComponentInChildren<Animator>();
+        controller = GetComponent<CharacterController>();
+        gfxRenderer = GetComponentInChildren<Renderer>();
+        animator = GetComponentInChildren<Animator>();
 
-    normalLayer = gameObject.layer;
-    slideLayer = LayerMask.NameToLayer("SlidePlayer");
-    jumpLayer = LayerMask.NameToLayer("JumpPlayer");
+        normalLayer = gameObject.layer;
+        slideLayer = LayerMask.NameToLayer("SlidePlayer");
+        jumpLayer = LayerMask.NameToLayer("JumpPlayer");
 
-    if (slideLayer == -1)
-    {
-        Debug.LogError("SlidePlayer layer bulunamadı!");
-    }
+        if (slideLayer == -1) Debug.LogError("SlidePlayer layer introuvable !");
+        if (jumpLayer == -1) Debug.LogError("JumpPlayer layer introuvable !");
 
-    lives = StartingLives;
-    maxLives = StartingLives;
-    fullHeart = CreateHeartTexture(true);
-    emptyHeart = CreateHeartTexture(false);
-    originalHeight = controller.height;
-    originalCenter = controller.center;
-    SpawnFollower();
+        lives = StartingLives;
+        maxLives = StartingLives;
+        fullHeart = CreateHeartTexture(true);
+        emptyHeart = CreateHeartTexture(false);
+        originalHeight = controller.height;
+        originalCenter = controller.center;
+
+        SpawnFollower();
     }
 
     void Update()
     {
-        direction.z = forwardSpeed;
-        direction.y += gravity * Time.deltaTime;
         direction.z = isSliding ? slideSpeed : forwardSpeed;
-        // if (controller.isGrounded)
-        // {
-        //     direction.y = 0;
-        //     if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
-        //     {
-        //         Jump();
-        //     }
-        //     else
-        //     {
-        //         direction.y += gravity * Time.deltaTime;
-        //     }
-        // }
+
         if (controller.isGrounded)
         {
             direction.y = -1f;
-            if (!isSliding) // ← ekle
+            isJumping = false;
+
+            if (!isSliding)
                 gameObject.layer = normalLayer;
+
             animator.SetBool("IsGrounded", true);
+
             if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
             {
                 animator.SetBool("IsGrounded", false);
@@ -135,12 +136,7 @@ public class Player : MonoBehaviour
             if (desiredLane == -1) desiredLane = 0;
         }
 
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            animator.SetTrigger("Slide");
-
-        }
-        if (Input.GetKeyDown(KeyCode.DownArrow) && !isSliding)
+        if (Input.GetKeyDown(KeyCode.DownArrow) && !isSliding && controller.isGrounded)
         {
             StartCoroutine(Slide());
         }
@@ -158,24 +154,32 @@ public class Player : MonoBehaviour
 
     private IEnumerator Slide()
     {
-    isSliding = true;  // ← eksikti
-    animator.SetTrigger("Slide");
+        isSliding = true;
+        animator.SetTrigger("Slide");
+        gameObject.layer = slideLayer;
 
-    gameObject.layer = slideLayer;
+        controller.height = originalHeight * 0.5f;
+        controller.center = new Vector3(originalCenter.x, controller.height / 2f, originalCenter.z);
 
-    controller.height = originalHeight * 0.5f;
-    controller.center = new Vector3(originalCenter.x, controller.height / 2f, originalCenter.z);
+        yield return new WaitForSeconds(slideDuration);
 
-    yield return new WaitForSeconds(slideDuration); // ← 0.8f yerine variable kullan
+        controller.height = originalHeight;
+        controller.center = originalCenter;
 
-    controller.height = originalHeight;
-    controller.center = originalCenter;
-
-    gameObject.layer = normalLayer;
-    isSliding = false;  // ← eksikti
+        gameObject.layer = normalLayer;
+        isSliding = false;
     }
-   private void FixedUpdate()
-{
+
+    private void Jump()
+    {
+        isJumping = true;
+        direction.y = jumpForce;
+        animator.SetTrigger("Jump");
+        gameObject.layer = jumpLayer;
+    }
+
+    private void FixedUpdate()
+    {
         controller.Move(direction * Time.fixedDeltaTime);
         RecordHistory();
         UpdateFollowers();
@@ -237,7 +241,6 @@ public class Player : MonoBehaviour
                 };
             }
         }
-
         return history[history.Count - 1];
     }
 
@@ -285,10 +288,7 @@ public class Player : MonoBehaviour
                 Color c = clear;
                 if (inside[i, j])
                 {
-                    if (filled)
-                    {
-                        c = red;
-                    }
+                    if (filled) c = red;
                     else
                     {
                         bool border = false;
@@ -308,42 +308,19 @@ public class Player : MonoBehaviour
                 tex.SetPixel(i, j, c);
             }
         }
-
         tex.Apply();
         return tex;
     }
 
-    // private void OnControllerColliderHit(ControllerColliderHit hit)
-    // {
-    // if (isSliding) return; // ← slide'daysa collision'ı yoksay
-    
-    // if (hit.normal.y < 0.5f)
-    //     touchingObstacle = true;
-    // }
     private void OnTriggerEnter(Collider other)
-{
-    if (isSliding || isJumping) return; // ← isJumping ekle
-    
-    if (other.CompareTag("Obstacle") && lives > 0)
     {
-        lives--;
-        if (followers.Count == 0)
-            SpawnFollower();
-    }
-}
+        if (isSliding || isJumping) return;
 
-    // private void OnTriggerExit(Collider other)
-    // {
-    //     if (other.CompareTag("Obstacle"))
-    //         touchingObstacle = false;
-    // }
-    private void OnTriggerExit(Collider other)
-{
-}
-private void Jump()
-{
-    direction.y = jumpForce;
-    animator.SetTrigger("Jump");
-    gameObject.layer = jumpLayer;
-}
+        if (other.CompareTag("Obstacle") && lives > 0)
+        {
+            lives--;
+            if (followers.Count == 0)
+                SpawnFollower();
+        }
+    }
 }
