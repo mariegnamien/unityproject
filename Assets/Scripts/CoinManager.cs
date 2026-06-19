@@ -4,10 +4,10 @@ using TMPro;
 
 public class CoinManager : MonoBehaviour
 {
-    [Header("R�glages de Rotation")]
+    [Header("Réglages de Rotation")]
     [SerializeField] private float rotationSpeed = 85f;
 
-    [Header("R�glages du Flottement")]
+    [Header("Réglages du Flottement")]
     [SerializeField] private float floatSpeed = 3f;
     [SerializeField] private float floatAmplitude = 0.2f;
 
@@ -42,6 +42,7 @@ public class CoinManager : MonoBehaviour
         rotation *= Quaternion.Euler(0f, rotationSpeed * Time.deltaTime, 0f);
         float hoverOffset = Mathf.Sin(Time.time * floatSpeed) * floatAmplitude;
 
+        // Boucle inversée ultra importante pour nettoyer les pièces manquantes sans faire planter le jeu
         for (int i = coins.Count - 1; i >= 0; i--)
         {
             if (coins[i] != null)

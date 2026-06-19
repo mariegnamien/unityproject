@@ -17,11 +17,13 @@ MonoBehaviour:
   m_Subtarget: 2
   m_PlatformId: 4e3c793746204150860bf175a9a41a05
   m_PlatformBuildProfile:
-    rid: 4802152666051641749
+    rid: 4802152575336448070
   m_OverrideGlobalSceneList: 1
   m_Scenes:
   - m_enabled: 1
-    m_path: Assets/Scenes/SampleScene.unity
+    m_path: Assets/Scenes/MainMenu.unity
+  - m_enabled: 1
+    m_path: Assets/Scenes/GameScene.unity
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
@@ -29,7 +31,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4802152666051641749
+    - rid: 4802152575336448070
       type: {class: WindowsPlatformSettings, ns: UnityEditor.WindowsStandalone, asm: UnityEditor.WindowsStandalone.Extensions}
       data:
         m_Development: 0
@@ -51,4 +53,4 @@ MonoBehaviour:
         m_CreateSolution: 0
         m_CopyPDBFiles: 0
         m_WindowsDevicePortalAddress: 
-        m_WindowsDevicePortalUsername: 
+        m_WindowsDevicePortalUsername:

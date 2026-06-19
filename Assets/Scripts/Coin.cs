@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class Coin : MonoBehaviour
 {
-    private float startY;
+    private float startY; // Pour stocker la hauteur de d√©part de la pi√®ce
 
     private void Start()
     {
-        // On sauvegarde la position Y initiale de la piËce avant qu'elle ne bouge
+        // On sauvegarde la position Y initiale de la pi√®ce avant qu'elle ne bouge
         startY = transform.position.y;
 
         if (CoinManager.Instance != null)
@@ -15,11 +15,11 @@ public class Coin : MonoBehaviour
         }
     }
 
-    // appelÈe par CoinManager ‡ chaque frame
+    // Cette fonction est appel√©e par le CoinManager √† chaque frame
     public void ApplyHover(float offset)
     {
         Vector3 newPosition = transform.position;
-        newPosition.y = startY + offset; // Hauteur de dÈpart + la vague de surgrËvement
+        newPosition.y = startY + offset; // Hauteur de d√©part + la vague de surgrelement
         transform.position = newPosition;
     }
 
@@ -33,16 +33,16 @@ public class Coin : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // On vÈrifie si l'objet qui touche la piËce a bien le tag "Player"
+        // On v√©rifie si l'objet qui touche la pi√®ce a bien le tag "Player"
         if (other.CompareTag("Player"))
         {
-            // + 1 piËce au compteur global
+            // 1. On dit au manager d'ajouter 1 pi√®ce au compteur global
             if (CoinManager.Instance != null)
             {
                 CoinManager.Instance.AddCoin(1);
             }
 
-            // On dÈtruit la piËce 
+            // 2. On d√©truit la pi√®ce (elle dispara√Æt de la sc√®ne)
             Destroy(gameObject);
         }
     }
