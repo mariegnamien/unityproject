@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1374372791674422259}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: fenceModel
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -49,6 +49,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: 1a935fa61d7ee07459af217cce0bb217, type: 3}
       propertyPath: m_Name
       value: fence_tile_03 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 1a935fa61d7ee07459af217cce0bb217, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 1a935fa61d7ee07459af217cce0bb217, type: 3}
       propertyPath: m_LocalScale.y
@@ -116,6 +120,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: fence_pillar_04
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 1a039573d41de564c82233cf91d21eaf, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 1a039573d41de564c82233cf91d21eaf, type: 3}
       propertyPath: m_LocalScale.y
       value: 3
@@ -181,6 +189,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: 1a039573d41de564c82233cf91d21eaf, type: 3}
       propertyPath: m_Name
       value: fence_pillar_04 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 1a039573d41de564c82233cf91d21eaf, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 1a039573d41de564c82233cf91d21eaf, type: 3}
       propertyPath: m_LocalScale.y
@@ -248,6 +260,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: fence_tile_03
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 1a935fa61d7ee07459af217cce0bb217, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 1a935fa61d7ee07459af217cce0bb217, type: 3}
       propertyPath: m_LocalScale.y
       value: 2
@@ -313,6 +329,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: 1a935fa61d7ee07459af217cce0bb217, type: 3}
       propertyPath: m_Name
       value: fence_tile_03 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 1a935fa61d7ee07459af217cce0bb217, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 1a935fa61d7ee07459af217cce0bb217, type: 3}
       propertyPath: m_LocalScale.y
@@ -380,6 +400,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: fence_pillar_04 (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 1a039573d41de564c82233cf91d21eaf, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 1a039573d41de564c82233cf91d21eaf, type: 3}
       propertyPath: m_LocalScale.y
       value: 6.75
@@ -445,6 +469,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: 1a935fa61d7ee07459af217cce0bb217, type: 3}
       propertyPath: m_Name
       value: fence_tile_03 (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 1a935fa61d7ee07459af217cce0bb217, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 1a935fa61d7ee07459af217cce0bb217, type: 3}
       propertyPath: m_LocalScale.x

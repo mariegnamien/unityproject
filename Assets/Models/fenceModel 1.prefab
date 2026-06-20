@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2338295797534536662}
   - component: {fileID: 2069629308260324086}
   - component: {fileID: 5587966538901430417}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: fence_tile_03 (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -119,7 +119,7 @@ GameObject:
   - component: {fileID: 4261606934493753790}
   - component: {fileID: 8342746231412567265}
   - component: {fileID: 9153882843098041132}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: fence_tile_03 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -224,9 +224,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4339068290033754953}
   - component: {fileID: 3369635211535991580}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: fenceModel 1
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -240,7 +240,7 @@ Transform:
   m_GameObject: {fileID: 397171846060238490}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.27, y: -0, z: 75.67}
+  m_LocalPosition: {x: -2.27, y: -0.18, z: 75.67}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -266,8 +266,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 9.436394, y: 2.6185005, z: 2.140953}
+  m_Center: {x: -0.15954208, y: 3.068668, z: -0.3399315}
 --- !u!1 &864107372815614185
 GameObject:
   m_ObjectHideFlags: 0
@@ -280,7 +280,7 @@ GameObject:
   - component: {fileID: 1409694999584934769}
   - component: {fileID: 6261146105203483089}
   - component: {fileID: 4434421869471433713}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: fence_tile_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -387,7 +387,7 @@ GameObject:
   - component: {fileID: 5094760334070612334}
   - component: {fileID: 473482541886187375}
   - component: {fileID: 2010506931777453957}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: fence_pillar_04 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -494,7 +494,7 @@ GameObject:
   - component: {fileID: 6769449562340229707}
   - component: {fileID: 3632564535278396987}
   - component: {fileID: 1045999347966991772}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: fence_pillar_04 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -598,7 +598,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7019072995138446140}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: fence (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -639,7 +639,7 @@ GameObject:
   - component: {fileID: 446250737470937750}
   - component: {fileID: 3496175033928260209}
   - component: {fileID: 8424836279649616212}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: fence_pillar_04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -746,7 +746,7 @@ GameObject:
   - component: {fileID: 5430460134876314572}
   - component: {fileID: 6394262965117074293}
   - component: {fileID: 8158718588007670820}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: fence_tile_03 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -849,9 +849,37 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4339068290033754953}
     m_Modifications:
+    - target: {fileID: 541258566835336522, guid: 1b78cef7a1072c843b3ea52cc85be289, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3143994531844471408, guid: 1b78cef7a1072c843b3ea52cc85be289, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4347035829876850286, guid: 1b78cef7a1072c843b3ea52cc85be289, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684506304966742124, guid: 1b78cef7a1072c843b3ea52cc85be289, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 5328835095691805962, guid: 1b78cef7a1072c843b3ea52cc85be289, type: 3}
       propertyPath: m_Name
       value: fence (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5328835095691805962, guid: 1b78cef7a1072c843b3ea52cc85be289, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5764046613955182817, guid: 1b78cef7a1072c843b3ea52cc85be289, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7989369713266881752, guid: 1b78cef7a1072c843b3ea52cc85be289, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8699654725079364913, guid: 1b78cef7a1072c843b3ea52cc85be289, type: 3}
       propertyPath: m_LocalPosition.x
@@ -892,6 +920,10 @@ PrefabInstance:
     - target: {fileID: 8699654725079364913, guid: 1b78cef7a1072c843b3ea52cc85be289, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9113836467515488986, guid: 1b78cef7a1072c843b3ea52cc85be289, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
