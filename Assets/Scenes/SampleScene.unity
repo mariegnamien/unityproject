@@ -1874,6 +1874,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoinManager
   rotationSpeed: 85
+  coinSoundClip: {fileID: 8300000, guid: eba069ffcc843544dade6412095e3619, type: 3}
   floatSpeed: 3
   floatAmplitude: 0.2
   coinText: {fileID: 1443877687}

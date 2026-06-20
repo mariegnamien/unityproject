@@ -6,6 +6,10 @@ public class CoinManager : MonoBehaviour
 {
     [Header("Rotation Settings")]
     [SerializeField] private float rotationSpeed = 85f;
+    
+    [Header("Sound Settings")]
+    [SerializeField] private AudioClip coinSoundClip;
+    private AudioSource audioSource;
 
     [Header("Hover Settings")]
     [SerializeField] private float floatSpeed = 3f;
@@ -23,6 +27,8 @@ public class CoinManager : MonoBehaviour
     public void Awake()
     {
         // Simple Singleton pattern: ensures only one instance of CoinManager exists
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.playOnAwake = false;
         if (Instance == null)
         {
             Instance = this;
@@ -66,6 +72,10 @@ public class CoinManager : MonoBehaviour
     {
         playerCoins += amount;
         UpdateCoinUI();
+        if (audioSource != null && coinSoundClip != null)
+    {
+        audioSource.PlayOneShot(coinSoundClip);
+    }
     }
 
     private void UpdateCoinUI()
