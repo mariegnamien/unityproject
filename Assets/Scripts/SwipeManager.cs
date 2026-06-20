@@ -2,27 +2,27 @@ using UnityEngine;
 
 public class SwipeManager : MonoBehaviour
 {
-    [Header("Références")]
-    public Player playerScript; // Glisse ton joueur ici dans l'émetteur
+    [Header("References")]
+    public Player playerScript;
 
     private Vector2 startTouchPosition;
     private Vector2 endTouchPosition;
 
-    [Header("Réglages")]
-    [Tooltip("Distance minimum en pixels pour que le glissement soit détecté")]
+    [Header("Settings")]
     [SerializeField] private float minSwipeDistance = 50f;
 
     void Update()
     {
-        if (Time.timeScale == 0f) return; // Si le jeu est en pause/GameOver, on ne swipe pas
+        // Ignore inputs if the game is paused or over
+        if (Time.timeScale == 0f) return;
 
-        // 1. Quand on CLIQUE
+        // 1. Record the screen position when the player first touches/clicks
         if (Input.GetMouseButtonDown(0))
         {
             startTouchPosition = Input.mousePosition;
         }
 
-        // 2. Quand on RELÂCHE
+        // 2. Record the screen position when the player releases the touch/click
         if (Input.GetMouseButtonUp(0))
         {
             endTouchPosition = Input.mousePosition;
@@ -30,16 +30,18 @@ public class SwipeManager : MonoBehaviour
         }
     }
 
+    // Calculates the distance and direction of the swipe to trigger player actions
     void DetectSwipe()
     {
         Vector2 swipeVector = endTouchPosition - startTouchPosition;
 
-        if (swipeVector.magnitude > minSwipeDistance && playerScript != null)
+        // Check if the movement is long enough to be considered a swipe
+        if ((Mathf.Abs(swipeVector.x) > minSwipeDistance || Mathf.Abs(swipeVector.y) > minSwipeDistance) && playerScript != null)
         {
-            // Horizontal vs Vertical
+            // Compare X axis and Y axis to see if the swipe was mostly horizontal or vertical
             if (Mathf.Abs(swipeVector.x) > Mathf.Abs(swipeVector.y))
             {
-                // Mouvement Horizontal
+                // Horizontal Swipe
                 if (swipeVector.x > 0)
                     playerScript.MoveRight();
                 else
@@ -47,7 +49,7 @@ public class SwipeManager : MonoBehaviour
             }
             else
             {
-                // Mouvement Vertical
+                // Vertical Swipe
                 if (swipeVector.y > 0)
                     playerScript.TriggerJump();
                 else

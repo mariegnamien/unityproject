@@ -7,12 +7,11 @@ public class ScoreManager : MonoBehaviour
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI multiplierText;
 
-    public float pointsPerUnit = 5f; // 5 points per unit of distance
-
+    public float pointsPerUnit = 5f;
     public Player playerScript;
-    public float timeToIncreaseSpeed = 10f; // Every 10 seconds, the speed increases
-    public float speedIncrement = 2f; // +2 to speed at each stage
-    public int multiplierIncrement = 1; // +1 to the multiplier at each stage
+    public float timeToIncreaseSpeed = 10f;
+    public float speedIncrement = 2f;
+    public int multiplierIncrement = 1;
 
     private float startZ;
     private int currentMultiplier = 1;
@@ -21,7 +20,7 @@ public class ScoreManager : MonoBehaviour
 
     void Start()
     {
-        // We register the player's starting Z position
+        // Save where the player started on the Z axis
         if (playerTransform != null)
         {
             startZ = playerTransform.position.z;
@@ -34,39 +33,35 @@ public class ScoreManager : MonoBehaviour
     {
         if (playerTransform == null) return;
 
-        // Calculating the score by distance
+        // Calculate how far the player traveled along the Z axis
         float distanceCalculated = playerTransform.position.z - startZ;
 
-        // Distance × Basis Points × Current Multiplier (stored in a 'long' to prevent overflow during calculation)
-        long rawScore = (long)(distanceCalculated * pointsPerUnit * currentMultiplier);
+        // Calculate score: Distance * Points * Multiplier, then convert to a whole number (int)
+        finalScore = (int)(distanceCalculated * pointsPerUnit * currentMultiplier);
 
-        // We clamp the score to the absolute maximum value of an int
-        finalScore = (int)Mathf.Min(rawScore, int.MaxValue);
-
-        // Score displayed (The "D8" forces at least 8 digits, but will naturally grow to 9 or 10 digits if needed)
+        // "D8" forces the text to display at least 8 digits (e.g., 00000125)
         scoreText.text = finalScore.ToString("D8");
 
-        // Time management for speed and multiplier
+        // Handle the timer to increase difficulty over time
         speedTimer += Time.deltaTime;
-
         if (speedTimer >= timeToIncreaseSpeed)
         {
             IncreaseDifficulty();
-            speedTimer = 0f; // We're resetting the timer for the next stage
+            speedTimer = 0f; // Reset timer for the next difficulty spike
         }
     }
 
+    // Increases game speed and score multiplier every X seconds
     void IncreaseDifficulty()
     {
-        // We're increasing the score multiplier
         currentMultiplier += multiplierIncrement;
         UpdateMultiplierUI();
 
-        // Safely increase the player's forward speed directly in their script
+        // Directly increase the speed variable inside the Player script
         if (playerScript != null)
         {
             playerScript.forwardSpeed += speedIncrement;
-            Debug.Log("Speed increased! New speed: " + playerScript.forwardSpeed + " | Multiplier : x" + currentMultiplier);
+            Debug.Log("Speed increased! New speed: " + playerScript.forwardSpeed);
         }
     }
 
@@ -78,6 +73,7 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    // Called by the Player script when the game ends to display the final score
     public int GetFinalScore()
     {
         return finalScore;

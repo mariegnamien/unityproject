@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -9,7 +10,7 @@ public class Player : MonoBehaviour
     private Vector3 direction;
     public float forwardSpeed;
 
-    private int desiredLane = 1;
+    private int desiredLane = 1; // 0 = Left, 1 = Middle, 2 = Right
     public float laneDistance;
 
     public float jumpForce;
@@ -28,7 +29,7 @@ public class Player : MonoBehaviour
     private Texture2D fullHeart;
     private Texture2D emptyHeart;
 
-    [Header("Écran de Fin")]
+    [Header("End Screen UI")]
     public GameObject gameOverUI;
 
     [Header("Audio")]
@@ -45,7 +46,7 @@ public class Player : MonoBehaviour
     private int slideLayer;
     private int jumpLayer;
 
-    [Header("Configuration du Fantôme")]
+    [Header("Ghost Follower Settings")]
     public GameObject follower;
     public float followerSpacing = 0.25f;
     public float followerAlpha = 0.5f;
@@ -53,7 +54,7 @@ public class Player : MonoBehaviour
     public float followerHeightOffset = 1.5f;
     private readonly List<Transform> followers = new List<Transform>();
 
-    [Header("UI de Fin de Partie")]
+    [Header("Game Over UI Components")]
     public TextMeshProUGUI gameOverCoinsText;
     public TextMeshProUGUI gameOverScoreText;
     public ScoreManager scoreManager;
@@ -84,6 +85,7 @@ public class Player : MonoBehaviour
         followers.Add(root.transform);
     }
 
+    // Structure to save player position and rotation at a specific timestamp
     private struct Snapshot
     {
         public float time;
@@ -104,17 +106,20 @@ public class Player : MonoBehaviour
         slideLayer = LayerMask.NameToLayer("SlidePlayer");
         jumpLayer = LayerMask.NameToLayer("JumpPlayer");
 
-        if (slideLayer == -1) Debug.LogError("SlidePlayer layer introuvable !");
-        if (jumpLayer == -1) Debug.LogError("JumpPlayer layer introuvable !");
+        if (slideLayer == -1) Debug.LogError("SlidePlayer layer not found!");
+        if (jumpLayer == -1) Debug.LogError("JumpPlayer layer not found!");
 
         lives = StartingLives;
         maxLives = StartingLives;
+
+        // Generate procedural textures for the heart UI system
         fullHeart = CreateHeartTexture(true);
         emptyHeart = CreateHeartTexture(false);
+
         originalHeight = controller.height;
         originalCenter = controller.center;
 
-        // Masquer l'écran de fin au début du jeu
+        // Hide the game over screen at start
         if (gameOverUI != null)
         {
             gameOverUI.SetActive(false);
@@ -125,8 +130,10 @@ public class Player : MonoBehaviour
     {
         if (Time.timeScale == 0f) return;
 
+        // Set forward speed depending on whether the player is sliding or running
         direction.z = isSliding ? slideSpeed : forwardSpeed;
 
+        // Handle ground checking, gravity, and jump inputs
         if (controller.isGrounded)
         {
             direction.y = -1f;
@@ -147,21 +154,12 @@ public class Player : MonoBehaviour
             direction.y += gravity * Time.deltaTime;
         }
 
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            MoveRight();
-        }
+        // Handle lane shifting and sliding keyboard inputs
+        if (Input.GetKeyDown(KeyCode.RightArrow)) MoveRight();
+        if (Input.GetKeyDown(KeyCode.LeftArrow)) MoveLeft();
+        if (Input.GetKeyDown(KeyCode.DownArrow)) TriggerSlide();
 
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            MoveLeft();
-        }
-
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            TriggerSlide();
-        }
-
+        // Calculate target X position based on current desired lane
         Vector3 targetPosition = transform.position;
         if (desiredLane == 2)
             targetPosition.x = laneDistance;
@@ -170,8 +168,10 @@ public class Player : MonoBehaviour
         else
             targetPosition.x = 0;
 
+        // Smoothly interpolate horizontal movement
         direction.x = (targetPosition.x - transform.position.x) * 10f;
 
+        // Handle obstacle hit logic and invincibility frames
         if (touchingObstacle && !wasTouchingObstacle)
         {
             if (Time.time >= invincibilityTimer && lives > 0)
@@ -201,13 +201,13 @@ public class Player : MonoBehaviour
             backgroundMusic.Stop();
         }
 
-        // 1. On récupère et affiche le total des pièces collectées via le CoinManager
+        //Retrieve and display total coins collected from CoinManager
         if (CoinManager.Instance != null && gameOverCoinsText != null)
         {
             gameOverCoinsText.text = "Pièces : " + CoinManager.Instance.GetCoinsCount();
         }
 
-        // 2. On récupère et affiche le score calculé via ton ScoreManager
+        // Retrieve and display final score from ScoreManager
         if (scoreManager != null && gameOverScoreText != null)
         {
             gameOverScoreText.text = "Score : " + scoreManager.GetFinalScore().ToString("D8");
@@ -218,10 +218,11 @@ public class Player : MonoBehaviour
             gameOverUI.SetActive(true);
         }
 
-        // On fige le temps du jeu
+        // Freeze game time
         Time.timeScale = 0f;
     }
 
+    // Coroutine to temporarily shrink the CharacterController hitbox during a slide
     private IEnumerator Slide()
     {
         isSliding = true;
@@ -294,12 +295,14 @@ public class Player : MonoBehaviour
     {
         if (isSliding || isJumping) return;
 
+        // Detect side collisions
         if (hit.normal.y < 0.5f)
         {
             touchingObstacle = true;
         }
     }
 
+    // Saves the current position and rotation of the player into the history list
     private void RecordHistory()
     {
         history.Add(new Snapshot
@@ -309,24 +312,27 @@ public class Player : MonoBehaviour
             rotation = transform.rotation
         });
 
-        // Marge de sécurité pour éviter de vider l'historique trop vite au début
+        // Clean old history items that are no longer needed by the ghost follower
         float safetyMargin = 2.0f;
         float oldestNeeded = Time.time - (followerDelay * (followers.Count + 1)) - safetyMargin;
         while (history.Count > 1 && history[0].time < oldestNeeded)
             history.RemoveAt(0);
     }
 
+    // Updates each ghost follower position based on past player snapshots
     private void UpdateFollowers()
     {
         for (int i = 0; i < followers.Count; i++)
         {
-            float targetTime = Time.time - followerDelay * (i + 1);
+            float speedFactor = Mathf.Max(1f, forwardSpeed / 10f);
+            float dynamicDelay = followerDelay / speedFactor;
+
+            float targetTime = Time.time - dynamicDelay * (i + 1);
             Snapshot snap = SampleHistory(targetTime);
 
             Vector3 pos = snap.position;
 
-            // Correction de l'écart fixe pour éviter qu'il s'éloigne hors caméra
-            pos.z -= (i + 1) * (followerSpacing * 0.4f);
+            pos.z -= (i + 1) * (followerSpacing * 0.5f);
             pos.y += followerHeightOffset;
 
             followers[i].position = pos;
@@ -334,6 +340,7 @@ public class Player : MonoBehaviour
         }
     }
 
+    // Smoothly looks up and blends past snapshots to find the exact position at 'targetTime'
     private Snapshot SampleHistory(float targetTime)
     {
         if (history.Count == 0)
@@ -349,6 +356,7 @@ public class Player : MonoBehaviour
                 if (i == history.Count - 1)
                     return history[i];
 
+                // Interpolate (blend) between snapshot A and snapshot B for pixel-perfect tracking
                 Snapshot a = history[i];
                 Snapshot b = history[i + 1];
                 float span = b.time - a.time;
@@ -364,6 +372,7 @@ public class Player : MonoBehaviour
         return history[history.Count - 1];
     }
 
+    // Built-in Legacy Unity function to draw UI hearts directly on screen layout coordinates
     private void OnGUI()
     {
         int heartSize = 40;
@@ -380,6 +389,7 @@ public class Player : MonoBehaviour
         }
     }
 
+    // Procedurally generates a heart shape texture by calculating mathematical borders pixel by pixel
     private Texture2D CreateHeartTexture(bool filled)
     {
         int size = 64;
@@ -430,5 +440,11 @@ public class Player : MonoBehaviour
         }
         tex.Apply();
         return tex;
+    }
+
+    // Triggered when clicking the Main Screen UI button to load the menu scene
+    public void GoToMainMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
     }
 }
