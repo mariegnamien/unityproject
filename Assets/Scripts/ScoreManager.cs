@@ -17,6 +17,7 @@ public class ScoreManager : MonoBehaviour
     private float startZ;
     private int currentMultiplier = 1;
     private float speedTimer;
+    private int finalScore;
 
     void Start()
     {
@@ -40,7 +41,7 @@ public class ScoreManager : MonoBehaviour
         long rawScore = (long)(distanceCalculated * pointsPerUnit * currentMultiplier);
 
         // We clamp the score to the absolute maximum value of an int
-        int finalScore = (int)Mathf.Min(rawScore, int.MaxValue);
+        finalScore = (int)Mathf.Min(rawScore, int.MaxValue);
 
         // Score displayed (The "D8" forces at least 8 digits, but will naturally grow to 9 or 10 digits if needed)
         scoreText.text = finalScore.ToString("D8");
@@ -75,5 +76,10 @@ public class ScoreManager : MonoBehaviour
         {
             multiplierText.text = "X" + currentMultiplier;
         }
+    }
+
+    public int GetFinalScore()
+    {
+        return finalScore;
     }
 }

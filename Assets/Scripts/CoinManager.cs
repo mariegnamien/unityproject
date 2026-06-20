@@ -79,4 +79,8 @@ public class CoinManager : MonoBehaviour
     {
         if (coins != null && coins.Contains(coin)) coins.Remove(coin);
     }
+    public int GetCoinsCount()
+    {
+        return playerCoins;
+    }
 }

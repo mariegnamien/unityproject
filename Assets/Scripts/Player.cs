@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Player : MonoBehaviour
 {
@@ -51,6 +52,11 @@ public class Player : MonoBehaviour
     public float followerDelay = 0.3f;
     public float followerHeightOffset = 1.5f;
     private readonly List<Transform> followers = new List<Transform>();
+
+    [Header("UI de Fin de Partie")]
+    public TextMeshProUGUI gameOverCoinsText;
+    public TextMeshProUGUI gameOverScoreText;
+    public ScoreManager scoreManager;
 
     private void SpawnFollower()
     {
@@ -133,8 +139,7 @@ public class Player : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
             {
-                animator.SetBool("IsGrounded", false);
-                Jump();
+                TriggerJump();
             }
         }
         else
@@ -144,19 +149,17 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            desiredLane++;
-            if (desiredLane == 3) desiredLane = 2;
+            MoveRight();
         }
 
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            desiredLane--;
-            if (desiredLane == -1) desiredLane = 0;
+            MoveLeft();
         }
 
-        if (Input.GetKeyDown(KeyCode.DownArrow) && !isSliding && controller.isGrounded)
+        if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            StartCoroutine(Slide());
+            TriggerSlide();
         }
 
         Vector3 targetPosition = transform.position;
@@ -173,7 +176,7 @@ public class Player : MonoBehaviour
         {
             if (Time.time >= invincibilityTimer && lives > 0)
             {
-                lives--; // On enlève 1 vie
+                lives--;
                 invincibilityTimer = Time.time + 1.2f;
 
                 if (followers.Count == 0)
@@ -198,12 +201,24 @@ public class Player : MonoBehaviour
             backgroundMusic.Stop();
         }
 
+        // 1. On récupère et affiche le total des pièces collectées via le CoinManager
+        if (CoinManager.Instance != null && gameOverCoinsText != null)
+        {
+            gameOverCoinsText.text = "Pièces : " + CoinManager.Instance.GetCoinsCount();
+        }
+
+        // 2. On récupère et affiche le score calculé via ton ScoreManager
+        if (scoreManager != null && gameOverScoreText != null)
+        {
+            gameOverScoreText.text = "Score : " + scoreManager.GetFinalScore().ToString("D8");
+        }
+
         if (gameOverUI != null)
         {
             gameOverUI.SetActive(true);
         }
 
-        // 2. On fige le temps du jeu
+        // On fige le temps du jeu
         Time.timeScale = 0f;
     }
 
@@ -231,6 +246,39 @@ public class Player : MonoBehaviour
         direction.y = jumpForce;
         animator.SetTrigger("Jump");
         gameObject.layer = jumpLayer;
+    }
+
+    public void MoveLeft()
+    {
+        if (Time.timeScale == 0f) return;
+        desiredLane--;
+        if (desiredLane == -1) desiredLane = 0;
+    }
+
+    public void MoveRight()
+    {
+        if (Time.timeScale == 0f) return;
+        desiredLane++;
+        if (desiredLane == 3) desiredLane = 2;
+    }
+
+    public void TriggerJump()
+    {
+        if (Time.timeScale == 0f) return;
+        if (controller.isGrounded)
+        {
+            animator.SetBool("IsGrounded", false);
+            Jump();
+        }
+    }
+
+    public void TriggerSlide()
+    {
+        if (Time.timeScale == 0f) return;
+        if (!isSliding && controller.isGrounded)
+        {
+            StartCoroutine(Slide());
+        }
     }
 
     private void FixedUpdate()
@@ -261,7 +309,9 @@ public class Player : MonoBehaviour
             rotation = transform.rotation
         });
 
-        float oldestNeeded = Time.time - followerDelay * (followers.Count + 1) - 0.5f;
+        // Marge de sécurité pour éviter de vider l'historique trop vite au début
+        float safetyMargin = 2.0f;
+        float oldestNeeded = Time.time - (followerDelay * (followers.Count + 1)) - safetyMargin;
         while (history.Count > 1 && history[0].time < oldestNeeded)
             history.RemoveAt(0);
     }
@@ -274,8 +324,11 @@ public class Player : MonoBehaviour
             Snapshot snap = SampleHistory(targetTime);
 
             Vector3 pos = snap.position;
-            pos.z -= (i + 1) * followerSpacing;
+
+            // Correction de l'écart fixe pour éviter qu'il s'éloigne hors caméra
+            pos.z -= (i + 1) * (followerSpacing * 0.4f);
             pos.y += followerHeightOffset;
+
             followers[i].position = pos;
             followers[i].rotation = snap.rotation;
         }
