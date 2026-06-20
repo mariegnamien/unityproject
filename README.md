@@ -9,6 +9,7 @@ Mécaniques du jeu :
   - Le joueur est capable de se déplacer de gauche à droite avec le clavier ou la souris (drag & drop).
   - Il peut également sauter et glisser au sol pour éviter les obstacles. Il ramasse des pièces en courant.
   - Le joueur a au total 2 vies et s'il touche deux obstacles il perd le jeu. Sinon, le jeu est infini, le but est d'avoir le score le plus éléeé possible.
+  - Système d'invincibilité temporaire : après avoir touché un obstacle, le joueur bénéficie d'une courte période d'invincibilité de 1.2 secondes pendant laquelle il ne peut pas perdre de vie supplémentaire. Cela évite de perdre plusieurs vies sur un même obstacle.
 
 Remarques particulières (limitations, bugs connus, voies d'amélioration): 
   - Pour le moment, notre chemin infini est limité à seulement 6 variations de chemin, ce qui rend le jeu assez redondant après une certaine durée.
