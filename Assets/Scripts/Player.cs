@@ -9,6 +9,10 @@ public class Player : MonoBehaviour
     private CharacterController controller;
     private Vector3 direction;
     public float forwardSpeed;
+    private float jumpBufferTime = 0.15f;
+    private float jumpBufferCounter = 0f;
+    private float coyoteTime = 0.12f;
+    private float coyoteCounter = 0f;
 
     private int desiredLane = 1; // 0 = Left, 1 = Middle, 2 = Right
     public float laneDistance;
@@ -130,12 +134,17 @@ public class Player : MonoBehaviour
     {
         if (Time.timeScale == 0f) return;
 
-        // Set forward speed depending on whether the player is sliding or running
+        // Input saut lu EN DEHORS du bloc isGrounded
+        if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
+            jumpBufferCounter = jumpBufferTime;
+        else
+            jumpBufferCounter -= Time.deltaTime;
+
         direction.z = isSliding ? slideSpeed : forwardSpeed;
 
-        // Handle ground checking, gravity, and jump inputs
         if (controller.isGrounded)
         {
+            coyoteCounter = coyoteTime; // recharge le timer tant qu'on est au sol
             direction.y = -1f;
             isJumping = false;
 
@@ -143,23 +152,27 @@ public class Player : MonoBehaviour
                 gameObject.layer = normalLayer;
 
             animator.SetBool("IsGrounded", true);
-
-            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Space))
-            {
-                TriggerJump();
-            }
         }
         else
         {
+            coyoteCounter -= Time.deltaTime; // décompte quand on quitte le sol
             direction.y += gravity * Time.deltaTime;
         }
 
-        // Handle lane shifting and sliding keyboard inputs
+        // La condition de saut utilise coyoteCounter au lieu de isGrounded
+        if (jumpBufferCounter > 0f && coyoteCounter > 0f)
+        {
+            jumpBufferCounter = 0f;
+            coyoteCounter = 0f; // consommé, on ne peut sauter qu'une fois
+            if (isSliding) StopSlideEarly();
+            animator.SetBool("IsGrounded", false);
+            Jump();
+        }
+
         if (Input.GetKeyDown(KeyCode.RightArrow)) MoveRight();
         if (Input.GetKeyDown(KeyCode.LeftArrow)) MoveLeft();
         if (Input.GetKeyDown(KeyCode.DownArrow)) TriggerSlide();
 
-        // Calculate target X position based on current desired lane
         Vector3 targetPosition = transform.position;
         if (desiredLane == 2)
             targetPosition.x = laneDistance;
@@ -168,10 +181,8 @@ public class Player : MonoBehaviour
         else
             targetPosition.x = 0;
 
-        // Smoothly interpolate horizontal movement
         direction.x = (targetPosition.x - transform.position.x) * 10f;
 
-        // Handle obstacle hit logic and invincibility frames
         if (touchingObstacle && !wasTouchingObstacle)
         {
             if (Time.time >= invincibilityTimer && lives > 0)
@@ -180,18 +191,15 @@ public class Player : MonoBehaviour
                 invincibilityTimer = Time.time + 1.2f;
 
                 if (followers.Count == 0)
-                {
                     SpawnFollower();
-                }
 
                 if (lives <= 0)
-                {
                     GameOver();
-                }
             }
         }
         wasTouchingObstacle = touchingObstacle;
         touchingObstacle = false;
+        controller.Move(direction * Time.deltaTime);
     }
 
     private void GameOver()
@@ -282,24 +290,53 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void StopSlideEarly()
+    {
+        StopAllCoroutines();
+        controller.height = originalHeight;
+        controller.center = originalCenter;
+        gameObject.layer = normalLayer;
+        isSliding = false;
+    }
+
     private void FixedUpdate()
     {
         if (Time.timeScale == 0f) return;
 
-        controller.Move(direction * Time.fixedDeltaTime);
+        //controller.Move(direction * Time.fixedDeltaTime);
         RecordHistory();
         UpdateFollowers();
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (isSliding || isJumping) return;
+        if (hit.normal.y >= 0.5f) return;
 
-        // Detect side collisions
-        if (hit.normal.y < 0.5f)
+        float contactHeight = hit.point.y - transform.position.y;
+        float highThreshold = originalHeight * 0.4f; // 1.4 au lieu de 1.75
+
+        Debug.Log($"contact height: {contactHeight}, threshold: {highThreshold}, isSliding: {isSliding}, isJumping: {isJumping}");
+
+        // ... reste du code
+
+        if (isSliding)
         {
-            touchingObstacle = true;
+            // En glissade : seulement les obstacles bas
+            if (contactHeight < highThreshold)
+                touchingObstacle = true;
+            return;
         }
+
+        if (isJumping)
+        {
+            // En saut : seulement les obstacles hauts
+            if (contactHeight >= highThreshold)
+                touchingObstacle = true;
+            return;
+        }
+
+        // Au sol normal : tout
+        touchingObstacle = true;
     }
 
     // Saves the current position and rotation of the player into the history list
