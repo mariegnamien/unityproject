@@ -1,4 +1,4 @@
-**Subway Surfers Revisité**
+Halloween Runner **Subway Surfers Revisité**
 
 Voici notre jeu Subway Surfers revisité.
 Ce jeu reprend les codes classiques du célèbre jeu Subway Surfers mais avec un thème thriller.
@@ -16,7 +16,11 @@ Remarques particulières (limitations, bugs connus, voies d'amélioration):
 
 
 Répartition de la production :
-      [à compléter]
+      Alkim GOR -> Gestion et intégration backend des animations du personnage principal, du sound design, de la création frontend des écrans du jeu.
+      Anchana FATIMA RAJAN -> Gestion backend des écrans du jeu, du sound design et création du système pièces et score, suivi des branches.
+      Marie-Emilienne GNAMIEN -> Gestion backend de la fonctionnaité "chemin infini" et création des mouvements du personnage (clavier et souris).
+      Nikola KALETKA -> Gestion backend des obstacles du jeu, des vies restantes du joueur et du comportement de la fantôme. 
+      
       
 Assets utilisés :
 Le chemin infini est composé d'un plan simple créé depuis Unity associé à des assets récupérés sur internet pour les obstacles.
